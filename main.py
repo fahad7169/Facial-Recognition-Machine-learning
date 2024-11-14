@@ -46,14 +46,21 @@ def log_attendance(student_name, course_name, instructor_name, class_time):
         'Course': [course_name],
         'Class Timing': [class_time]
     }
-    df = pd.DataFrame(data)
+    new_entry = pd.DataFrame(data)
 
-    # Check if the file exists and choose the mode
-    file_exists = os.path.exists(attendance_file_path)
+    # Check if the file exists
+    if os.path.exists(attendance_file_path):
+        # Load existing attendance data
+        existing_data = pd.read_excel(attendance_file_path)
+        # Append new entry to the existing data
+        updated_data = pd.concat([existing_data, new_entry], ignore_index=True)
+    else:
+        # No existing file, create new data with headers
+        updated_data = new_entry
 
-    # Write attendance data to Excel file without blocking the main thread
-    with pd.ExcelWriter(attendance_file_path, mode='a' if file_exists else 'w') as writer:
-        df.to_excel(writer, index=False, header=not file_exists)  # Append data if file exists
+    # Write updated data to Excel file, overwriting the file each time
+    with pd.ExcelWriter(attendance_file_path, mode='w') as writer:
+        updated_data.to_excel(writer, index=False, header=True)
 
 def start_attendance_logging(student_name, course_name, instructor_name, class_time):
     # Start a separate thread for logging attendance to keep the main UI responsive
@@ -62,6 +69,7 @@ def start_attendance_logging(student_name, course_name, instructor_name, class_t
 
 def recognize_and_log(course_name, instructor_name, class_time):
     cap = cv2.VideoCapture(0)
+    marked_students = set()  # To track students who are already marked
 
     while True:
         ret, frame = cap.read()
@@ -72,17 +80,32 @@ def recognize_and_log(course_name, instructor_name, class_time):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml').detectMultiScale(
             gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        
+         # Define a confidence threshold to consider a prediction valid
+        confidence_threshold = 0.6
 
         for (x, y, w, h) in faces:
             face_img = frame[y:y+h, x:x+w]
             student_name, confidence = predict_image(face_img)
 
-            # Log attendance if confidence is high
-            if confidence > 0.6:  # Adjust threshold as needed
-                start_attendance_logging(student_name, course_name, instructor_name, class_time)
-                cv2.putText(frame, f"{student_name} ({confidence*100:.2f}%)", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-                print(f"Marked {student_name} present at {datetime.now().strftime('%H:%M:%S')}")
+            if confidence >= confidence_threshold:
 
+                label = f"{student_name} ({confidence * 100:.2f}%)"
+
+                if student_name not in marked_students:
+                    # Mark the student as present
+                    start_attendance_logging(student_name, course_name, instructor_name, class_time)
+                    marked_students.add(student_name)
+                    messagebox.showinfo("Marked Present",f" Marked {student_name} present at {datetime.now().strftime('%I:%M:%S %p')}")
+                else:
+                     # Show a dialog box indicating that the student is already marked
+                    messagebox.showinfo("Already Marked", f"{student_name} is already marked present.")
+                   
+            else:
+                label = "Unknown"
+
+            # Display the label on the camera feed
+            cv2.putText(frame, label, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
         cv2.imshow('Attendance System', frame)
@@ -91,7 +114,6 @@ def recognize_and_log(course_name, instructor_name, class_time):
 
     cap.release()
     cv2.destroyAllWindows()
-
 
 
 def start_attendance():

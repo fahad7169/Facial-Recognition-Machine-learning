@@ -1,3 +1,4 @@
+#trai.py
 import os
 import numpy as np
 import cv2
@@ -58,7 +59,7 @@ def train_cnn_model(directory):
 
 
    # Train the model with early stopping
-    model.fit(images, labels, epochs=10, batch_size=16, validation_split=0.2, callbacks=[early_stopping])
+    model.fit(images, labels, epochs=15, batch_size=16, validation_split=0.2, callbacks=[early_stopping])
 
     # Save the trained model
     model.save('face_recognition_model.keras')

@@ -9,7 +9,6 @@ def create_cnn_model(input_shape=(224, 224, 1)):
         MaxPooling2D(2, 2),
         Flatten(),
         Dense(128, activation='relu'),
-        Dropout(0.5),
         Dense(64, activation='relu')
     ])
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])

@@ -1,3 +1,4 @@
+#predict.py
 import cv2
 import numpy as np
 import pickle
@@ -77,7 +78,7 @@ if __name__ == "__main__":
             predicted_label, confidence = predict_image(face_image)
 
             # Define a confidence threshold to consider a prediction valid
-            confidence_threshold = 0.65
+            confidence_threshold = 0.6
 
             # If the confidence is above the threshold, show the predicted name; otherwise, show "Unknown"
             if confidence >= confidence_threshold:
