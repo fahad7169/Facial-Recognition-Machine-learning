@@ -17,6 +17,23 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 # Function to preprocess the image before prediction
 def preprocess_image(img):
     # Convert to grayscale
+    """
+    Preprocess an image for face recognition.
+
+    The function takes an input image in BGR format and applies the following steps:
+
+    1. Convert the image to grayscale.
+    2. Resize the image to 224x224 (the input size of the model).
+    3. Normalize the image to the range [0, 1].
+    4. Expand the dimensions of the image to match the input shape of the model (batch size, height, width, channels).
+
+    Args:
+        img (numpy array): Input image in BGR format.
+
+    Returns:
+        numpy array: Preprocessed image with shape (1, 224, 224, 1).
+    """
+    
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     # Resize the image to match the input size of the model (224x224)
@@ -33,6 +50,19 @@ def preprocess_image(img):
 # Function to predict the label of the given image
 def predict_image(face_image):
     # Preprocess the face image
+    """
+    Predicts the label and confidence score for a given face image.
+
+    This function takes a face image as input, preprocesses it to match the input
+    requirements of the model, and then uses the pre-trained model to predict the
+    class label and confidence score of the face image.
+
+    Args:
+        face_image (numpy array): The input face image in BGR format.
+
+    Returns:
+        tuple: A tuple containing the predicted label (str) and the confidence score (float).
+    """
     img = preprocess_image(face_image)
     
     # Make a prediction using the model

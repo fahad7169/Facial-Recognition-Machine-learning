@@ -1,4 +1,4 @@
-#trai.py
+#train.py
 import os
 import numpy as np
 import cv2
@@ -10,6 +10,22 @@ import pickle
 
 # Function to load images and labels
 def load_images_from_directory(directory):
+    """
+    Load images and labels from a directory.
+
+    The directory should contain subfolders, each containing images of a particular class.
+    The images should be in grayscale format and have the same size.
+
+    Parameters:
+        directory (str): The path to the directory containing the class folders.
+
+    Returns:
+        tuple: A tuple containing three elements: a numpy array of images, a numpy array of labels, and a LabelEncoder object.
+
+    Notes:
+        The images are resized to 224x224. If you need a different size, modify the code accordingly.
+        The images are normalized to the range [0, 1]. If you don't want normalization, comment out the relevant line.
+    """
     images = []
     labels = []
     label_encoder = LabelEncoder()
@@ -42,6 +58,24 @@ def load_images_from_directory(directory):
 
 # Function to train the model
 def train_cnn_model(directory):
+
+    
+    """
+    Train a CNN model for face recognition using images from a given directory.
+
+    The images are expected to be in subdirectories, where each subdirectory represents a class (e.g., a person's name).
+
+    The function loads the images, builds a CNN model, compiles it with Adam optimizer and sparse categorical cross-entropy
+    loss, and trains it using early stopping. The trained model is saved to a file named 'face_recognition_model.keras',
+    and the label encoder is saved to a file named 'label_encoder.pkl' using pickle.
+
+    Args:
+        directory (str): The path to the directory containing the image subdirectories.
+
+    Returns:
+        None
+    """
+
     # Load images and labels
     images, labels, label_encoder = load_images_from_directory(directory)
 

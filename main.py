@@ -1,3 +1,4 @@
+#main.py
 import os
 import cv2
 import pandas as pd
@@ -14,6 +15,16 @@ import threading
 model = load_model('face_recognition_model.keras')
 
 def load_label_encoder(encoder_path='label_encoder.pkl'):
+    """
+    Load a label encoder from a pickle file.
+
+    Args:
+        encoder_path (str): The path to the pickle file containing the label encoder. 
+                            Defaults to 'label_encoder.pkl'.
+
+    Returns:
+        LabelEncoder: The loaded label encoder object.
+    """
     with open(encoder_path, 'rb') as f:
         label_encoder = pickle.load(f)
     return label_encoder
@@ -23,6 +34,21 @@ label_encoder = load_label_encoder()
 
 def log_attendance(student_name, course_name, instructor_name, class_time):
     # Format current date and time
+    """
+    Logs a student's attendance in an Excel file.
+
+    Parameters:
+        student_name (str): Name of the student.
+        course_name (str): Name of the course.
+        instructor_name (str): Name of the instructor.
+        class_time (str): Time of the class.
+
+    Notes:
+        The attendance file is saved in a directory named "attendance_records".
+        The file name is formatted as "YYYY-MM-DD_HHMMSS_attendance.xlsx".
+        If the file does not exist, it is created with the headers.
+        If the file exists, the new entry is appended to the existing data.
+    """
     date_now = datetime.now().strftime('%Y-%m-%d')
     time_now = datetime.now().strftime('%I:%M:%S %p')
 
@@ -64,10 +90,36 @@ def log_attendance(student_name, course_name, instructor_name, class_time):
 
 def start_attendance_logging(student_name, course_name, instructor_name, class_time):
     # Start a separate thread for logging attendance to keep the main UI responsive
+    """
+    Starts a separate thread for logging attendance to keep the main UI responsive.
+
+    Parameters:
+        student_name (str): Name of the student.
+        course_name (str): Name of the course.
+        instructor_name (str): Name of the instructor.
+        class_time (str): Time of the class.
+    """
     log_thread = threading.Thread(target=log_attendance, args=(student_name, course_name, instructor_name, class_time))
     log_thread.start()
 
 def recognize_and_log(course_name, instructor_name, class_time):
+    
+    """
+    Recognizes faces in a video stream and logs attendance.
+
+    This function captures a video stream from the default camera, detects faces in the stream, and recognizes the students
+    using the pre-trained model. If a student is recognized with a confidence above a certain threshold, they are marked
+    as present and their name is displayed on the camera feed. If a student is already marked present, a dialog box is
+    shown indicating that they are already marked.
+
+    Parameters:
+        course_name (str): Name of the course.
+        instructor_name (str): Name of the instructor.
+        class_time (str): Time of the class.
+
+    Returns:
+        None
+    """
     cap = cv2.VideoCapture(0)
     marked_students = set()  # To track students who are already marked
 
@@ -118,6 +170,17 @@ def recognize_and_log(course_name, instructor_name, class_time):
 
 def start_attendance():
     # Get values from input fields
+    """
+    Starts the attendance logging process.
+
+    Retrieves the values from the input fields for course name, instructor name, and class time.
+    Checks that all fields are filled, and if not, shows an error message and returns.
+    If all fields are filled, calls recognize_and_log to start the attendance logging process.
+
+    Returns:
+        None
+    """
+    
     course_name = course_entry.get()
     instructor_name = instructor_entry.get()
     class_time = time_entry.get()
