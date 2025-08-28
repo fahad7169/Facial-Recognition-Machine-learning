@@ -49,6 +49,7 @@ def process_and_save_faces(input_folder, output_folder, target_size=(224, 224)):
             # Convert to grayscale for face detection
             gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
+            
             # Detect faces in the image
             faces = face_cascade.detectMultiScale(gray_img, scaleFactor=1.3, minNeighbors=5, minSize=(30, 30))
             

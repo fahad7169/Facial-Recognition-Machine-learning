@@ -1,3 +1,4 @@
 dataset/
 *.keras
 *.pkl
+resized_images/
